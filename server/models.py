@@ -3,6 +3,11 @@ from sqlalchemy_serializer import SerializerMixin
 
 from config import db, bcrypt
 
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy_serializer import SerializerMixin
+
+from config import db, bcrypt
+
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
 
@@ -10,7 +15,7 @@ class User(db.Model, SerializerMixin):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, unique=True, nullable=False)
-    _password_hash = db.Column(db.String)
+    _password_hash = db.Column(db.String)  # Remove nullable=False
     image_url = db.Column(db.String)
     bio = db.Column(db.String)
 
@@ -39,12 +44,13 @@ class Recipe(db.Model, SerializerMixin):
         db.CheckConstraint('length(instructions) >= 50'),
     )
 
+    serialize_rules = ('-user.recipes',)
+
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
     instructions = db.Column(db.String, nullable=False)
     minutes_to_complete = db.Column(db.Integer)
-
-    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=True)
 
     def __repr__(self):
         return f'<Recipe {self.id}: {self.title}>'
